@@ -73,23 +73,23 @@ class ZENA:
         Z2 = self.W2.dot(A1) + self.b2
         A2 = self.ReLU(Z2)
         Z3 = self.W3.dot(A2) + self.b3
-        A3 = self.sigmoid(Z3)
-        return Z1, A1, Z2, A2, Z3, A3
+        Y_hat = self.sigmoid(Z3)
+        return Z1, A1, Z2, A2, Z3, Y_hat
 
     @staticmethod
     def ReLU_deriv(Z):
         return Z > 0
 
-    def compute_loss(self, A3, Y):
+    def compute_loss(self, Y_hat, Y):
         m = Y.shape[0]
         epsilon = 1e-10
-        log_probs = -Y * np.log(A3 + epsilon) - (1 - Y) * np.log(1 - A3 + epsilon)
+        log_probs = -Y * np.log(Y_hat + epsilon) - (1 - Y) * np.log(1 - Y_hat + epsilon)
         loss = np.sum(log_probs) / m
         return loss
     
-    def backward_prop(self, Z1, A1, Z2, A2, Z3, A3, X, Y):
+    def backward_prop(self, Z1, A1, Z2, A2, Z3, Y_hat, X, Y):
         m = X.shape[1]
-        dZ3 = A3 - Y
+            
         dW3 = 1 / m * dZ3.dot(A2.T)
         db3 = 1 / m * np.sum(dZ3, axis=1, keepdims=True)
         dZ2 = self.W3.T.dot(dZ3) * self.ReLU_deriv(Z2)
@@ -116,8 +116,8 @@ class ZENA:
         self.b3 -= self.learning_rate * self.vb3
 
     @staticmethod
-    def get_predictions(A3):
-        return (A3 > 0.5).astype(int)
+    def get_predictions(Y_hat):
+        return (Y_hat > 0.5).astype(int)
     
     @staticmethod
     def get_accuracy(predictions, Y):
@@ -134,9 +134,9 @@ class ZENA:
         best_iter = 0
 
         for i in range(self.iterations):
-            Z1, A1, Z2, A2, Z3, A3 = self.forward_prop(X_train)
-            train_loss = self.compute_loss(A3, Y_train)
-            dW1, db1, dW2, db2, dW3, db3 = self.backward_prop(Z1, A1, Z2, A2, Z3, A3, X_train, Y_train)
+            Z1, A1, Z2, A2, Z3, Y_hat = self.forward_prop(X_train)
+            train_loss = self.compute_loss(Y_hat, Y_train)
+            dW1, db1, dW2, db2, dW3, db3 = self.backward_prop(Z1, A1, Z2, A2, Z3, Y_hat, X_train, Y_train)
             self.update_params(dW1, db1, dW2, db2, dW3, db3)
 
             if i % 1000 == 0:
@@ -144,8 +144,8 @@ class ZENA:
                 train_loss_history.append(train_loss)
                 print(f"Training Loss: {train_loss}")
 
-                _, _, _, _, _, val_A3 = self.forward_prop(X_val)
-                val_loss = self.compute_loss(val_A3, Y_val)
+                _, _, _, _, _, val_Y_hat = self.forward_prop(X_val)
+                val_loss = self.compute_loss(val_Y_hat, Y_val)
                 val_loss_history.append(val_loss)
                 print(f"Validation Loss: {val_loss}")
 
@@ -159,8 +159,8 @@ class ZENA:
         return train_loss_history, val_loss_history
 
     def predict(self, X):
-        _, _, _, _, _, A3 = self.forward_prop(X)
-        predictions = self.get_predictions(A3)
+        _, _, _, _, _, Y_hat = self.forward_prop(X)
+        predictions = self.get_predictions(Y_hat)
         return predictions.flatten()
 
     def save_params(self, file_path):
