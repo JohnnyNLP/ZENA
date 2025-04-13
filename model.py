@@ -89,7 +89,8 @@ class ZENA:
     
     def backward_prop(self, Z1, A1, Z2, A2, Z3, Y_hat, X, Y):
         m = X.shape[1]
-            
+        
+        dZ3 = Y_hat - Y
         dW3 = 1 / m * dZ3.dot(A2.T)
         db3 = 1 / m * np.sum(dZ3, axis=1, keepdims=True)
         dZ2 = self.W3.T.dot(dZ3) * self.ReLU_deriv(Z2)

@@ -37,11 +37,11 @@ def data_splitter(data, train_ratio=0.8, val_ratio=0.1, test_ratio=0.1, random_s
     print('*'*100)
     
     # Split X, Y
-    train_X = np.array(train_data.iloc[:, 1:-1], dtype=int).T
+    train_X = np.array(train_data.iloc[:, :-1], dtype=int).T
     train_Y = np.array(train_data.iloc[:, -1], dtype=int)
-    val_X = np.array(val_data.iloc[:, 1:-1], dtype=int).T
+    val_X = np.array(val_data.iloc[:, :-1], dtype=int).T
     val_Y = np.array(val_data.iloc[:, -1], dtype=int)
-    test_X = np.array(test_data.iloc[:, 1:-1], dtype=int).T
+    test_X = np.array(test_data.iloc[:, :-1], dtype=int).T
     test_Y = np.array(test_data.iloc[:, -1], dtype=int)
 
     return train_X, train_Y, val_X, val_Y, test_X, test_Y
