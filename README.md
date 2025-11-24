@@ -1,6 +1,6 @@
 # ZENA: Enhanced Anomaly-Based IDS for Smart Homes Automation Through Multilayer Artificial Neural Network
 
-This is the official GitHub repository for the paper **"ZENA: Enhanced Anomaly-Based IDS for Smart Homes Automation Through Multilayer Artificial Neural Network"** published in the **Journal of Communications and Networks**.
+This is the official GitHub repository for the paper **"ZENA: Enhanced Anomaly-Based IDS for Smart Homes Automation Through Multilayer Artificial Neural Network"** submitted to the **Journal of Communications and Networks**.
 
 ## Overview
 
