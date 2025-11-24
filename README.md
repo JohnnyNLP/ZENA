@@ -19,6 +19,7 @@ The model uses momentum-based gradient descent optimization and supports multipl
 ## Features
 
 - Multi-layer artificial neural network for anomaly detection
+- **GPU acceleration support** (optional, via CuPy)
 - Early stopping mechanism to prevent overfitting
 - Support for customizable hyperparameters
 - Model parameter saving and loading functionality
@@ -26,10 +27,17 @@ The model uses momentum-based gradient descent optimization and supports multipl
 
 ## Requirements
 
+### Required
 - Python 3.x
 - NumPy >= 1.19.0
 - Pandas >= 1.0.0
 - scikit-learn >= 0.23.0
+
+### Optional (GPU Support)
+- CuPy (for GPU acceleration)
+  - For CUDA 11.x: `pip install cupy-cuda11x`
+  - For CUDA 12.x: `pip install cupy-cuda12x`
+  - If CuPy is not installed, the model will automatically use CPU (NumPy)
 
 ## Installation
 
@@ -63,13 +71,19 @@ python train.py \
     --momentum 0.9
 ```
 
+Train with GPU acceleration (requires CuPy):
+
+```bash
+python train.py --use_gpu
+```
+
 ### Using the Model in Python
 
 ```python
 from model import ZENA
 import numpy as np
 
-# Initialize the model
+# Initialize the model (CPU)
 model = ZENA(
     input_size=30,
     hidden_size1=128,
@@ -80,6 +94,20 @@ model = ZENA(
     tolerance=1e-4,
     init_method='xavier',
     momentum=0.9
+)
+
+# Initialize the model with GPU acceleration
+model_gpu = ZENA(
+    input_size=30,
+    hidden_size1=128,
+    hidden_size2=32,
+    learning_rate=0.03,
+    iterations=100000,
+    early_stopping_rounds=5000,
+    tolerance=1e-4,
+    init_method='xavier',
+    momentum=0.9,
+    use_gpu=True  # Enable GPU acceleration
 )
 
 # Train the model
@@ -108,6 +136,18 @@ model.load_params('params/ZENA_model.pkl')
 | `tolerance` | 1e-4 | Minimum improvement threshold for early stopping |
 | `init_method` | 'xavier' | Weight initialization method (xavier, he, random, zero) |
 | `momentum` | 0.9 | Momentum coefficient for gradient descent |
+| `use_gpu` | False | Enable GPU acceleration (requires CuPy) |
+
+### GPU Acceleration
+
+The model supports optional GPU acceleration through CuPy. If `use_gpu=True` is specified but CuPy is not installed, the model will automatically fall back to CPU (NumPy) with a warning message.
+
+**Installing CuPy:**
+- For NVIDIA GPUs with CUDA 11.x: `pip install cupy-cuda11x`
+- For NVIDIA GPUs with CUDA 12.x: `pip install cupy-cuda12x`
+- For ROCm (AMD GPUs): `pip install cupy-rocm-5-0` (or appropriate version)
+
+GPU acceleration can significantly speed up training, especially for large datasets or many iterations.
 
 ## Data Format
 

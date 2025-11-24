@@ -64,6 +64,7 @@ g.add_argument("--early_stopping_rounds", type=int, default=5000, required=False
 g.add_argument("--tolerance", type=float, required=False, default=1e-4, help="Default set at 1e-4")
 g.add_argument("--init_method", type=str, required=False, default='xavier', help="Default xavier, choose one from zero, random, he, and xavier")
 g.add_argument("--momentum", type=float, required=False, default=0.9, help="Default set at 0.9")
+g.add_argument("--use_gpu", action="store_true", help="Enable GPU acceleration (requires CuPy)")
 g.add_argument("--note", type=str, required=False, default="", help="Any note to mention for this checkpoint")
 
 
@@ -78,7 +79,18 @@ def main(args):
     tolerance = args.tolerance
     init_method = args.init_method
     momentum = args.momentum
+    use_gpu = args.use_gpu
     note = args.note
+    
+    # GPU support check
+    if use_gpu:
+        try:
+            import cupy as cp
+            print("GPU acceleration enabled (CuPy available)")
+        except ImportError:
+            print("Warning: --use_gpu specified but CuPy is not installed. Falling back to CPU.")
+            print("To use GPU acceleration, install CuPy: pip install cupy-cuda11x (for CUDA 11.x)")
+            use_gpu = False
 
     # Data Loader
     data = pd.read_csv("ZENA_data.csv")
@@ -93,22 +105,34 @@ def main(args):
                     early_stopping_rounds=early_stopping_rounds,
                     tolerance=tolerance,
                     init_method=init_method,
-                    momentum=momentum)
+                    momentum=momentum,
+                    use_gpu=use_gpu)
 
     # Model Train
     train_loss_history, val_loss_history = model.fit(train_x, train_y, val_x, val_y)
     accuracy, f1 = get_confusion_matrix(model, test_x, test_y)
     
     # Get Experiment Results
-    experiment_record = (model_name, input_size, learning_rate, iterations, len(train_loss_history*1000), min(val_loss_history),
-                         train_loss_history[-1], val_loss_history[-1], accuracy, f1, note)
+    experiment_record = {
+        'model_name': model_name,
+        'input_size': input_size,
+        'learning_rate': learning_rate,
+        'iterations': iterations,
+        'actual_iterations': len(train_loss_history) * 1000,
+        'min_val_loss': min(val_loss_history),
+        'final_train_loss': train_loss_history[-1],
+        'final_val_loss': val_loss_history[-1],
+        'test_accuracy': accuracy,
+        'test_f1': f1,
+        'note': note
+    }
 
     # Save the Results
-    try :
+    try:
         experiment_result = pd.read_csv('model_experiment.csv')
-        experiment_result.loc[len(experiment_result)] = experiment_record
-    except: 
-        experiment_result = experiment_record
+        experiment_result = pd.concat([experiment_result, pd.DataFrame([experiment_record])], ignore_index=True)
+    except FileNotFoundError:
+        experiment_result = pd.DataFrame([experiment_record])
         
     experiment_result.to_csv('model_experiment.csv', index=False)
     save_path = f'params/{model_name}.pkl'

@@ -1,3 +1,7 @@
 numpy>=1.19.0
 pandas>=1.0.0
 scikit-learn>=0.23.0
+# GPU support (optional) - install CuPy for GPU acceleration
+# For CUDA 11.x: pip install cupy-cuda11x
+# For CUDA 12.x: pip install cupy-cuda12x
+# If not installed, the model will automatically fall back to CPU (NumPy)
